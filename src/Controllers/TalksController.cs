@@ -93,7 +93,7 @@ namespace CoreCodeCamp.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public async Task<ActionResult<TalkModel>> Get(string moniker, int id, TalkModel model)
+        public async Task<ActionResult<TalkModel>> Put(string moniker, int id, TalkModel model)
         {
             try
             {
@@ -118,6 +118,31 @@ namespace CoreCodeCamp.Controllers
                 else
                 {
                     return BadRequest("Faild to update database.");
+                }
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Database Failure");
+            }
+        }
+
+        [HttpDelete("{id:int}")]
+        public async Task<ActionResult> Delete(string moniker, int id)
+        {
+            try
+            {
+                var talk = await _repository.GetTalkByMonikerAsync(moniker, id);
+                if (talk == null) return NotFound("Couldn't find the talk");
+
+                _repository.Delete(talk);
+
+                if (await _repository.SaveChangesAsync())
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest("Faild to delete talk");
                 }
             }
             catch (Exception)
